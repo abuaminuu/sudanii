@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from products.models import Product, ProductImage, Category
+from accounts.serializers import UserPublicSerializer, UserRegistrationSerializer
 
 class ProductImageSerializer(serializers.ModelSerializer):
 
@@ -19,7 +20,7 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     
     # Prevent client from specifying or tampering with these fields during POST/PUT
-    merchant = serializers.ReadOnlyField()
+    merchant = UserPublicSerializer(read_only=True)
     slug = serializers.ReadOnlyField()
 
     class Meta:
@@ -32,7 +33,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return value
 
     def validate_stock(self, value):
-        if value< 0:
+        if value < 0:
             raise ValidationError("Stock cannot be negative.")
         return value
 
