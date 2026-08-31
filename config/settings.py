@@ -145,3 +145,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# HDD to save files in the server 
+MEDIA_URL = "/media/"
+# where client browser URL path to request to view images
+MEDIA_ROOT = BASE_DIR / "media"
