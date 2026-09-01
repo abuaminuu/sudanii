@@ -66,11 +66,11 @@ AUTH_USER_MODEL= "accounts.User"
 
 # restframework settings
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHRNTICATION_CLASSS":(
-        "rest_framework_simplejwt.authentication.simpleJWTauthentication",
+    "DEFAULT_AUTHENTICATION_CLASSS":(
+        "rest_framework_simplejwt.authentication.JWTauthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES":(
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly"
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
 }
 
