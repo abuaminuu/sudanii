@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAdminUser
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsVendorOrReadonly(BasePermission):
 
@@ -14,8 +14,14 @@ class IsVendorOrReadonly(BasePermission):
             return True
         # only merchant and requst.user can modify data
         return obj.merchant == request.user
-    
-class IsAdminUserOrReadOnly(IsAdminUser):
+
+class IsAdminUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        is_admin = super().has_permission(request, view)
-        return request.method in SAFE_METHODS or is_admin
+        if request.method in SAFE_METHODS:
+            return True
+        
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and (request.user.is_staff or getattr(request.user, "role", None) == "admin")
+        )
