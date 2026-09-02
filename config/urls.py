@@ -19,11 +19,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+from products.views import ProductViewSet, CategoryViewSet
+from orders.views import OrderViewSet
+
+router = DefaultRouter()
+
+# using namespace to avoid conflicts with other apps for resource viewsets
+router.register(r"orders", OrderViewSet, basename="order")
+router.register(r"products", ProductViewSet, basename="product")
+router.register(r"categories", CategoryViewSet, basename="category")
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("accounts.urls")),
-    path("api/", include("products.urls")),
+    path("api/", include(router.urls))
 ]
 
 # Serve media uploads during local development (DEBUG=True)
