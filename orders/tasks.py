@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.utils import timezone
 from celery import shared_task
 from django.core.mail import send_mail
+from accounts import models
 from orders.models import Order
 from products.models import Product
 from django.conf import settings
@@ -81,3 +82,25 @@ def cancel_stale_unpaid_orders():
             cancelled_count += 1
 
     return f"Cancelled {cancelled_count} stale unpaid orders withing last 24 hours."
+
+def weekly_order_report(order):
+    """
+    Generates a summary of weekly order activity.
+    """
+    summary = {
+        "total_orders": Order.objects.filter(created_at__gte=timezone.now() - timedelta(days=7)).count(),
+        "total_revenue": Order.objects.filter(created_at__gte=timezone.now() - timedelta(days=7)).aggregate(total_revenue=models.Sum('total_price'))['total_revenue'] or 0,
+        "cancelled_orders": Order.objects.filter(status="cancelled", created_at__gte=timezone.now() - timedelta(days=7)).count(),
+        "pending_orders": Order.objects.filter(status="pending", created_at__gte=timezone.now() - timedelta(days=7)).count(),
+        "completed_orders": Order.objects.filter(status="completed", created_at__gte=timezone.now() - timedelta(days=7)).count(),
+    }
+    
+    return summary
+
+
+@shared_task
+def payments_summary():
+    """
+    A simple test task to verify Celery is working.
+    """
+    return "Payments updates working fine!"
