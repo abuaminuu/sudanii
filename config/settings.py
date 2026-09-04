@@ -11,25 +11,29 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from a .env file
+env = environ.Env()
+# Load development environment variables
+environ.Env.read_env(".env.dev")  
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-&vwj6pncch1m@365x+(bw0$k#e&rg%z_xjrs15l)e$z^md@)#c"
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = []
-
+# Allow all hosts for development
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"]) 
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -104,13 +108,21 @@ DATABASES = {
     }
 }
 
+# Payment gateway settings
+FLUTTERWAVE_SECRET_KEY = env("FLUTTERWAVE_SECRET_KEY")  
+FLUTTERWAVE_SECRET_HASH = env("FLUTTERWAVE_SECRET_HMAP")
+
+
 # celery & redis config
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-CELERY_RESULTS_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULTS_BACKEND = env("CELERY_RESULTS_BACKEND", default="redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+REDIS_HOST = env("REDIS_HOST", default="localhost")
+REDIS_PORT = env("REDIS_PORT", default=6379)
+REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 
 # email settings
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
