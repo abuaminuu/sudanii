@@ -7,5 +7,6 @@ router = DefaultRouter()
 router.register(r"orders", OrderViewSet, basename="orders")
 
 urlpatterns = [
+    path("orders/webhook/", OrderViewSet.as_view(), name="payment-webhook"),
     path("", include(router.urls))
 ]
