@@ -13,7 +13,6 @@ class Category(models.Model):
     slug = models.SlugField(max_length=64, unique=True)
     parent_category = models.ForeignKey("self", on_delete=models.CASCADE, related_name="subcategories", null=True, blank=True)
 
-    
 
 class Product(models.Model):
     merchant = models.ForeignKey(User, on_delete=models.CASCADE, related_name="products")
@@ -30,10 +29,9 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         # if no slug
         if not self.slug:
-            slug = slugify(self.name)
-            # gen 6-hex values
-            ghex = uuid4().hex[:6]
-            self.slug = f"{slug}-{ghex}"
+            # gen 12-hex values
+            slug = f"{slugify(self.name)}-{uuid4().hex[:12]}"
+            self.slug = slug
 
         # save method to commit to database
         super().save(*args, **kwargs)
