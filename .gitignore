@@ -2,3 +2,6 @@
 .env.prod
 .env.sample
 file.txt
+thunder1.http
+seeders/
+./db.sqlite3
