@@ -76,7 +76,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES":(
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
-    "DEFAULT_PAGINATION_CLASS":"rest_framework.pagination.PageNumberPagination",
+    # "DEFAULT_PAGINATION_CLASS":"rest_framework.pagination.PageNumberPagination",
+    'DEFAULT_PAGINATION_CLASS': 'config.pagination.ProductCursorPagination',
     "PAGE_SIZE":5,
 }
 
@@ -175,3 +176,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 # where client browser URL path to request to view images
 MEDIA_ROOT = BASE_DIR / "media"
+
+CACHES = {
+    "default":{
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "ON_CONNECTION_ERROR": "LOG",
+            "SOCKET_CONNECT_TIMEOUT": 2,
+            "SOCKET_TIMEOUT": 2,
+        },
+        "KEY_PREFIX": "sudanii_cache"
+    }
+}
+
+# cache timeout (secs * mins)
+CACHE_TTL = 60 * 15 
