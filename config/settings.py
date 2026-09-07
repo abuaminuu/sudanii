@@ -10,8 +10,19 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+"""
+Init Sentry at the top of settings.py so it captures exceptions 
+occurring early in the Django boot sequence.
+"""
+import os
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+
 from pathlib import Path
 import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,6 +31,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 # Load development environment variables
 environ.Env.read_env(".env.dev")  
+
+# sentry sdk
+SENTRY_DSN = env("SENTRY_DSN")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            RedisIntegration(),
+            CeleryIntegration()
+        ],
+        # performance monitoring and tracing
+        # capture 10% in prod
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+        # attach auth userid to sentry error events
+        send_default_pii=True,
+        environment=env.str("DJANGO_ENV", "production"),
+    )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -193,3 +224,56 @@ CACHES = {
 
 # cache timeout (secs * mins)
 CACHE_TTL = 60 * 15 
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            # "()":"pythonjsonlogger.jsonlogger.JsonFormatter",
+            "()": "pythonjsonlogger.json.JsonFormatter",
+            "format":"%(asctime)s %(levelname)s %(name)s %(message)s %(pathname)s %(lineno)s",
+        },
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+
+            },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json" if env.str("DJANGO_ENV") == "development" else "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False
+        },
+        # dedicated application loggers
+        "orders":{
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "payments": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False
+        },
+        "products": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True
+        }
+    },
+}
+    
+
+
